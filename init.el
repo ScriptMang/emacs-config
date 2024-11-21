@@ -44,7 +44,7 @@
 
 (elpaca elpaca-use-package
 (elpaca-use-package-mode))
-
+(elpaca-wait)
 
 ;; Adds crafted-emacs modules to the `load-path', sets up a module
 ;; writing template, sets the `crafted-emacs-home' variable.
@@ -52,25 +52,16 @@
 (load "~/crafted-emacs/modules/crafted-completion-config")
 
 ;;; Configuration phase
-;;(use-package general :ensure (:wait t) :demand t)
+;;(use-package general :ensure (:wait t))
+
+
 
 ;;; Optional configuration
-
-;; load ef-theme, but remove previous theme
-;;(mapc #'disable-theme custom-enabled-themes)
-;;(use-package ef-themes
-;;  :ensure t
-;;  :config
-;;  (load-theme 'ef-dream t)
-;;  :demand t)
-
-
 ;; load timu theme
 (use-package timu-spacegrey-theme
   :ensure t
   :config
-  (load-theme `timu-spacegrey t)
-  :demand t)
+  (load-theme `timu-spacegrey t))
 
 ;; disable Emacs toolbar
 (tool-bar-mode -1)
@@ -110,19 +101,18 @@
 
 ;;; dashboard for emacs
 (use-package dashboard
-  :ensure (:wait t)
+  :ensure t
   :config
   (dashboard-setup-startup-hook)
   (setq dashboard-startup-banner 'logo
       dashboard-display-icons-p t ;; display icons on both GUI and terminal
       dashboard-icon-type 'nerd-icons) ;; use `nerd-icons' package
-  :demand t)
+)
 
 ;; xah-flykeys
 (use-package xah-fly-keys
- :ensure (:wait t)
- :init (xah-fly-keys 1)
- :demand t)
+ :ensure t
+ :init (xah-fly-keys 1))
 
 ;; Which-Key Config
 (use-package which-key
@@ -130,13 +120,11 @@
 :config
 (setq which-key-paging-prefixes '("C-x"))
 (setq which-key-paging-key "<f5>")
-(which-key-mode)
-:demand t)
+(which-key-mode))
 
 ;; Replace Emacs default describe commands with helpful package
 (use-package helpful
- :ensure (:wait t)
- :demand t)
+ :ensure t)
 (global-set-key (kbd "C-h f") #'helpful-callable)
 
 (global-set-key (kbd "C-h v") #'helpful-variable)
@@ -157,11 +145,10 @@
 
 ;; access devdocs
 (use-package devdocs
- :ensure (:wait t)
- :demand t)
+ :ensure t)
 
 
-(use-package diminish :ensure (:wait t) :demand t)
+(use-package diminish :ensure t)
 ;; let emacs know to use authinfo.gpg as my password store
 (setq auth-sources '("~/.authinfo.gpg"))
 ;; setup emacs to ask for password authnetication
@@ -216,23 +203,23 @@
   (set-face-attribute 'org-checkbox nil :inherit 'fixed-pitch))
 
 (use-package org
-  :ensure (:wait t)
+  :ensure t
   :hook (org-mode . efs/org-mode-setup)
   :config
   (setq org-ellipsis " ▾")
-  (efs/org-font-setup)
-  :demand t)
+  (efs/org-font-setup))
+(elpaca-wait)
+
 
 (setq org-agenda-files 
       `("~/Library/Mobile Documents/com~apple~CloudDocs/Org Notes/conch.org"))
 
 (use-package org-bullets
-  :ensure (:wait t)
+  :ensure t
   :after org
   :hook (org-mode . org-bullets-mode)
   :custom
-  (org-bullets-bullet-list '("◉" "○" "●" "○" "●" "○" "●"))
-  :demand t)
+  (org-bullets-bullet-list '("◉" "○" "●" "○" "●" "○" "●")))
 
 (defun efs/org-mode-visual-fill ()
   (setq visual-fill-column-width 100
@@ -240,129 +227,117 @@
   (visual-fill-column-mode 1))
 
 (use-package visual-fill-column
-  :ensure (:wait t)
-  :hook (org-mode . efs/org-mode-visual-fill)
-  :demand t)
+  :ensure t
+  :hook (org-mode . efs/org-mode-visual-fill))
 
 
 (use-package d2-mode
-   :ensure (:wait t)
-   :demand t)
+   :ensure t)
 
 
 ;; easily let-bind vals of an assoc-list by their names
 ;; dependency for forge
 (use-package let-alist
-  :ensure 
-  (:wait t)
+  :ensure t
   :after 
-  (elpaca)
-  :demand t)
-
+  (elpaca))
+(elpaca-wait)
 
 ;; transient; dependency for magit
   (use-package transient
-   :ensure (:source "MELPA" :host github :repo "magit/transient")
-   :demand t)
+   :ensure (:source "MELPA" :host github :repo "magit/transient"))
+(elpaca-wait)
 
 ;; Magit
   (use-package magit
-  :ensure (:source "MELPA" :host github :repo "magit/magit" :wait t)
+  :ensure (:source "MELPA" :host github :repo "magit/magit")
   :custom
-  (magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1)
-  :demand t)
+  (magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1))
+(elpaca-wait)
+
 
 ;;hl-todo depedency for magit-todo
 (use-package hl-todo
- :ensure (:wait t)
- :demand t)
+ :ensure t)
+(elpaca-wait)
 
 ;; magit todos
 (use-package magit-todos
- :ensure (:wait t)
+ :ensure t
  :after magit
- :config (magit-todos-mode 1)
- :demand t)
+ :config (magit-todos-mode 1))
 
 ;; allows manipulation of forges; like github
 ;; activate after magit
 ;; submode to magit
 (use-package forge
   :ensure (:host github :repo "magit/forge")
-  :after magit
-  :demand t)
+  :after magit)
 
 ;; use calibrereader in emacs
 (use-package calibredb
-  :ensure(:wait t)
+  :ensure t
   :config
   (setq calibredb-program "/Applications/calibre.app/Contents/MacOS/calibredb")
   (setq calibredb-root-dir "~/Calibre Library")
   (setq calibredb-db-dir (expand-file-name "metadata.db" calibredb-root-dir))
   (setq calibredb-library-alist '(("~/Calibre Library")))
   (setq calibredb-search-page-max-rows 44)
-  (setq calibredb-id-width 4)
-  :demand t)
-
+  (setq calibredb-id-width 4))
+(elpaca-wait)
 
 ;; edit table of contents for pdfs/dvjs files
 (use-package doc-toc
-  :ensure(:wait t)
-  :demand t)
-	     
+  :ensure t)
+       
 (use-package nov 
-  :ensure(:wait t)
+  :ensure t
   :after esxml
-  :config (add-to-list 'auto-mode-alist '("\\.epub\\'" . nov-mode))
-  :demand t)
-
+  :config (add-to-list 'auto-mode-alist '("\\.epub\\'" . nov-mode)))
+(elpaca-wait)
 
 (use-package nov-xwidget
-  :ensure (:host github :repo "chenyanming/nov-xwidget" :wait t)
+  :ensure (:host github :repo "chenyanming/nov-xwidget")
   :after nov
   :config
   (define-key nov-mode-map (kbd "o") 'nov-xwidget-view)
-  (add-hook 'nov-mode-hook 'nov-xwidget-inject-all-files)
-  :demand t)
+  (add-hook 'nov-mode-hook 'nov-xwidget-inject-all-files))
 
 
 
 
 ;; drag lines and regions easily
 (use-package drag-stuff
- :ensure (:wait t)
+ :ensure t
  :init
 (drag-stuff-global-mode 1)
-(drag-stuff-define-keys)
- :demand t)
+(drag-stuff-define-keys))
 
 (use-package nerd-icons
-  :ensure (:wait t)
+  :ensure t
   :custom
   ;; The Nerd Font you want to use in GUI
   ;; "Symbols Nerd Font Mono" is the default and is recommended
   ;; but you can use any other Nerd Font if you want
-  (nerd-icons-font-family "Symbols Nerd Font Mono")
-  :demand t)
+  (nerd-icons-font-family "Symbols Nerd Font Mono"))
+(elpaca-wait)
 
  ;;Use nerdicons in buffer switcher
  (use-package nerd-icons-ibuffer
-  :ensure (:wait t)
-  :hook (ibuffer-mode . nerd-icons-ibuffer-mode)
-  :demand t)
+  :ensure t
+  :hook (ibuffer-mode . nerd-icons-ibuffer-mode))
 
 (use-package nerd-icons-completion
-  :ensure (:wait t)
+  :ensure t
   :after marginalia
   :config
   (nerd-icons-completion-mode)
-  (add-hook 'marginalia-mode-hook #'nerd-icons-completion-marginalia-setup)
-  :demand t)
+  (add-hook 'marginalia-mode-hook #'nerd-icons-completion-marginalia-setup))
 
-;; my custom-icons
+;; my mode-line
 
 (use-package doom-modeline
-  :ensure (:wait t)
+  :ensure t
   :init (doom-modeline-mode 1)
   :config
   (setq doom-modeline-height 25)
@@ -372,21 +347,20 @@
   (setq doom-modeline-flycheck-enable t)
   (setq doom-modeline-hud nil)
   (setq doom-modeline-workspace-name nil)
-  (setq doom-modeline-buffer-file-name-style 'file-name)
-  :demand t)
+  (setq doom-modeline-buffer-file-name-style 'file-name))
 
-;; install all the icons
-;; Inserts an icon for Emacs Lisp
+;; install nerd icons for dired
 (use-package nerd-icons-dired
-  :ensure (:wait t)
+  :ensure t
   :hook
-  (dired-mode . nerd-icons-dired-mode)
-  :demand t)
+  (dired-mode . nerd-icons-dired-mode))
   (add-to-list 'nerd-icons-extension-icon-alist '("epub" nerd-icons-faicon "nf-fa-book" :face nerd-icons-red))
+(elpaca-wait)
 
 
+;; provides a directory tree
 (use-package treemacs
-  :ensure (:wait t)
+  :ensure t
   :defer t
   :init
   (with-eval-after-load 'winum
@@ -471,30 +445,28 @@
         ("C-x t B"   . treemacs-bookmark)
         ("C-x t C-t" . treemacs-find-file)
         ("C-x t M-t" . treemacs-find-tag))
-  :demand t)
+   )
+(elpaca-wait)
+
 
 (use-package treemacs-nerd-icons
-  :ensure (:wait t)
+  :ensure t
   :config
-  (treemacs-load-theme "nerd-icons")
-  :demand t)
+  (treemacs-load-theme "nerd-icons"))
 
 (use-package project-treemacs
-  :ensure (:wait t)
-  :demand t
+  :ensure t
   :after treemacs
   :config
   (project-treemacs-mode))
 
 ;; collection of really useful extensions
 (use-package crux
- :ensure (:wait t)
- :demand t)
+ :ensure t)
 
 (use-package treemacs-magit
    :ensure (:host github :repo "Alexander-Miller/treemacs")
-   :after (treemacs magit)
-   :demand t)
+   :after (treemacs magit))
 
 ;; enable avy go to line
 (global-set-key (kbd "M-g f") 'avy-goto-line)
@@ -502,7 +474,7 @@
 
 ;; Programming Configs
 (use-package go-mode
-  :ensure (:wait t)
+  :ensure t
   :config
   (autoload 'go-mode "go-mode" nil t)
   (add-to-list 'auto-mode-alist '("\\.go\\'" . go-mode))
@@ -512,12 +484,11 @@
     (setq-default) 
     (setq tab-width 4) 
     (setq standard-indent 1) 
-    (setq indent-tabs-mode nil)))
-  :demand t)
+    (setq indent-tabs-mode nil))))
 
 ;; go-tags mode enalble
 (use-package go-tag
- :ensure (:wait t)
+ :ensure t
  :after go-mode
  :config
  (define-key go-mode-map (kbd "C-c t") #'go-tag-add)
@@ -525,7 +496,7 @@
 
 ;; lsp is allows for language syntax highlighting
 (use-package lsp-mode
-  :ensure (:wait t)
+  :ensure t
   :commands (lsp lsp-deferred)
   :init
   (setq lsp-keymap-prefix "C-c l")
@@ -539,12 +510,11 @@
   (add-hook 'before-save-hook #'lsp-organize-imports t t)
   (add-hook 'before-save-hook #'gofmt-before-save))
 
-  (add-hook 'go-mode-hook #'lsp-go-install-save-hooks) 
-    :demand t)
+  (add-hook 'go-mode-hook #'lsp-go-install-save-hooks) )
+(elpaca-wait)
 
 (use-package lsp-ui
-  :ensure (:wait t)
-  :demand t)
+  :ensure t)
 
 ;; increase emacs default garbage-collection threshold of 800kb
 ;;(setq gc-cons-threshold 400000000) ;;400MB
@@ -558,32 +528,22 @@
 
 ;; flycheck: Syntax Checker
 (use-package flycheck
-  :ensure (:wait t)
-  :init (global-flycheck-mode)
-  :demand t)
-
-;; flycheck fancy-ui
-;;(use-package flycheck-indicator
-;; :ensure (:wait t)
-;; :hook (flycheck-mode . flycheck-indicator-mode)
-;; :demand t)
+  :ensure t
+  :init (global-flycheck-mode))
 
 ;; flycheck-golangci-linter
 (use-package flycheck-golangci-lint
-  :ensure (:wait t)
+  :ensure t
   :hook (go-mode . flycheck-golangci-lint-setup)
-  :config (setq flycheck-golangci-lint-config "~/.emacs.d/elpa/flycheck-golangci-lint-20240329.1647/golangcli-lint-config/.golangci.yml")
-  :demand t)
+  :config (setq flycheck-golangci-lint-config "~/.emacs.d/elpa/flycheck-golangci-lint-20240329.1647/golangcli-lint-config/.golangci.yml"))
 
 ;;consult-lsp integration
 (use-package consult-lsp
-  :ensure (:wait t)
-  :demand t)
+  :ensure t)
 
 (use-package jsonrpc
-:ensure (:wait t)
-:demand t
-)
+:ensure t)
+(elpaca-wait)
 
 (use-package dape
   :ensure (:host github :repo "svaante/dape")
@@ -623,8 +583,8 @@
 
   ;; Projectile users
   ;; (setq dape-cwd-fn 'projectile-project-root)
-  :demand t
   )
+(elpaca-wait)
 
 ;; Enable repeat mode for more ergonomic `dape' use
 (use-package repeat
@@ -634,16 +594,17 @@
 
 ;; Emmet for webdev
 (use-package emmet-mode
- :ensure (:wait t)
+ :ensure t
  :config
 (add-hook 'sgml-mode-hook 'emmet-mode) ;; Auto-start on any markup modes
 (add-hook 'css-mode-hook  'emmet-mode) ;; enable Emmet's css abbreviation.
 (setq emmet-move-cursor-between-quotes t) ;; default nil
- :demand t)
+)
+
 
 ;; web-mode config for web templating
 (use-package web-mode
- :ensure (:wait t)
+ :ensure t
  :config
 (add-to-list 'auto-mode-alist'("\\.html?\\'" . web-mode))
 (add-to-list 'auto-mode-alist'("\\.css\\'" . web-mode))
@@ -655,64 +616,50 @@
   (setq web-mode-css-indent-offset 2)
   (setq web-mode-code-indent-offset 2)
 )
-(add-hook 'web-mode-hook 'my-web-mode-hook)
- :demand t)
+(add-hook 'web-mode-hook 'my-web-mode-hook))
 
 (use-package htmltagwrap
-  :ensure (:wait t)
+  :ensure t
   :config
   (setq htmltagwrap-tag "div")
   (setq htmltagwrap-indent-region-after-wrap t)
-  (setq htmltagwrap-indie-tag-wrap-not-inline t)
-  :demand t)
+  (setq htmltagwrap-indie-tag-wrap-not-inline t))
 
 ;; js2 minor-mode
 (use-package js2-mode 
- :ensure (:wait t)
+ :ensure t
  :config
 (add-hook 'js-mode-hook 'js2-minor-mode)
-(add-to-list 'interpreter-mode-alist '("node" . js2-mode))
- :demand t)
+(add-to-list 'interpreter-mode-alist '("node" . js2-mode)))
 
 ;; folding files/code closures
 (use-package origami
- :ensure (:wait t)
- :demand t)
+ :ensure t)
 
 ;; lsp support for func folding
 (use-package lsp-origami
- :ensure (:wait t)
+ :ensure t
  :config
- (add-hook 'lsp-after-open-hook #'lsp-origami-try-enable)
- :demand t)
+ (add-hook 'lsp-after-open-hook #'lsp-origami-try-enable))
 
 ;; snippets
 (use-package yasnippet
- :ensure (:wait t)
- :init (yas-global-mode 1)
- :demand t)
+ :ensure t
+ :init (yas-global-mode 1))
 
 ;; stored snippets
 (use-package yasnippet-snippets
- :ensure (:wait t)
- :demand t)
-
-;; transient with calculator-mode
-;;(use-package casual-calc
-;;  :ensure (:wait t)
-;;  :demand t
- ;; :bind (:map calc-mode-map ("C-o" . 'casual-main-menu)))
+ :ensure t)
 
 ;; save buffers along with split window configs
 ;; in a named workspace tab
 (use-package activities
-  :ensure (:wait t)
+  :ensure t
   :init
   (activities-mode)
   (activities-tabs-mode)
   ;; Prevent `edebug' default bindings from interfering.
   (setq edebug-inhibit-emacs-lisp-mode-bindings t)
-  :demand t
   :bind
   (("C-x C-a C-n" . activities-new)
    ("C-x C-a C-d" . activities-define)
@@ -733,15 +680,14 @@
 
 ;;Use base  Project.el for projects with add consult support
 (use-package consult-project-extra
-  :ensure (:wait t)
-  :demand t)
+  :ensure t)
 
 ;; Profile emacs startup
 (defun crafted-startup-example/display-startup-time ()
   "Display the startup time after Emacs is fully initialized."
   (message "Crafted Emacs loaded in %s."
            (emacs-init-time)))
-(add-hook 'emacs-startup-hook #'crafted-startup-example/display-startup-time)
+(add-hook 'elpaca-after-init #'crafted-startup-example/display-startup-time)
 
 
 ;;(setq custom-file (expand-file-name "custom.el" user-emacs-directory)) ;;; Code: if custom file exists
@@ -751,6 +697,9 @@
 
 (setq custom-file (expand-file-name "customs.el" user-emacs-directory))
 (add-hook 'elpaca-after-init-hook (lambda () (load custom-file 'noerror)))
+
+(setq elpaca-after-init-time (or elpaca-after-init-time (current-time)))
+(elpaca-wait)
 
 (provide 'init)
 ;;; init.el ends here
