@@ -39,14 +39,21 @@
   :type 'boolean
   :group 'crafted-init)
 
-(when (version< emacs-version "29")
+;;;(when (version< emacs-version "29")
   ;; Get some Emacs 29 compatibility functions. Notably missing is
   ;; `setopt' which the `compat' library deliberately does not
   ;; provide, so we continue to use the `customize-set-variable'
   ;; function for setting user options, unless we have a version guard
   ;; around a block, in which case we use `setopt' instead.
-  (unless (require 'compat nil :noerror)
-    (package-install 'compat)))
+
+;; elpaca modified edit  
+;;(unless (require 'compat nil :noerror)
+;;;    (package-install 'compat)))
+
+(use-package compat 
+ :ensure (:source "ELPA" :host github :repo "https://github.com/emacs-compat/compat")
+)
+
 
 (require 'project)
 
@@ -161,9 +168,9 @@ we can't reload the file."
 
 ;; Save all customizations to `custom-file', unless the user opted out.
 (when crafted-init-auto-save-customized
-  (add-hook 'after-init-hook #'crafted-save-customized))
+  (add-hook 'elpaca-after-init-hook #'crafted-save-customized))
 (when crafted-init-auto-save-selected-packages
-  (add-hook 'after-init-hook #'package--save-selected-packages))
+  (add-hook 'elpaca-after-init-hook #'package--save-selected-packages))
 
 (provide 'crafted-init-config)
 ;;; crafted-init-config.el ends here

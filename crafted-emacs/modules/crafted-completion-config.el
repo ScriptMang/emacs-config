@@ -16,11 +16,11 @@
 
 ;;; Vertico
 (use-package vertico
-  :ensure (:wait t)
-  :init (vertico-mode)
-  :demand t)
+  :ensure t
+  :init (vertico-mode))
+  (elpaca-wait)
   
-   ;;submodule to vertico
+  ;;submodule to vertico
   (use-package vertico-directory
     :ensure (:host github :repo "minad/vertico")
     :after crafted-deafults-config
@@ -29,9 +29,9 @@
     (fido-vertical-mode -1)
     (icomplete-mode -1)
     (icomplete-vertical-mode -1)
-    (customize-set-variable 'vertico-cycle t)
-    :demand t)
-;;(require 'vertico-directory)
+    (customize-set-variable 'vertico-cycle t))
+
+  ;;(require 'vertico-directory)
   ;; Cycle back to top/bottom result when the edge is reached
  
 
@@ -39,12 +39,12 @@
   ;; they have been turned on by crafted-defaults-config, because they interfere
   ;; with this module.
   ;;(with-eval-after-load 'crafted-defaults-config
-   
+   (elpaca-wait)
 
 
 ;;; Marginalia
 (use-package marginalia
-  :ensure (:wait t)
+  :ensure t
   :init (marginalia-mode 1) 
   :config
    ;; Configure Marginalia
@@ -52,7 +52,8 @@
                           '(marginalia-annotators-heavy
                             marginalia-annotators-light
                             nil))
-  :demand t)
+  )
+(elpaca-wait)
 
 
 ;;; Consult
@@ -68,29 +69,29 @@
 
 ;;; Orderless
 (use-package orderless
-  :ensure (:wait t)
+  :ensure t
   :config
   ;; Set up Orderless for better fuzzy matching
   (customize-set-variable 'completion-styles '(orderless basic))
   (customize-set-variable 'completion-category-overrides
                           '((file (styles . (partial-completion)))))
-  :demand t)
+ )
+
 
 
 ;;; Embark
 (use-package embark
-  :ensure (:wait t)
+  :ensure t
   :config
   (keymap-global-set "<remap> <describe-bindings>" #'embark-bindings)
   (keymap-global-set "C-." 'embark-act)
   ;; Use Embark to show bindings in a key prefix with `C-h`
   (setq prefix-help-command #'embark-prefix-help-command))
-
+(elpaca-wait)
 
   (use-package embark-consult 
     :ensure (:host github :repo "oantolin/embark")	       
-    :hook (embark-collect-mode . consult-preview-at-point-mode)
-    :demand t)
+    :hook (embark-collect-mode . consult-preview-at-point-mode))
 
 
 ;;; Corfu
@@ -102,13 +103,13 @@
   (customize-set-variable 'corfu-cycle t)        ; Allows cycling through candidates
   (customize-set-variable 'corfu-auto t)         ; Enable auto completion
   (customize-set-variable 'corfu-auto-prefix 2)  ; Complete with less prefix keys
-   :demand t)
+ )
+(elpaca-wait)
 
   (unless (display-graphic-p)
     (use-package corfu-terminal
        :ensure (:host github :repo "minad/corfu")
-       :init (corfu-terminal-mode +1))
-    :demand t)
+       :init (corfu-terminal-mode +1))) 
 
      (use-package corfu-popupinfo
        :ensure (:host github :repo "minad/corfu")
@@ -117,14 +118,13 @@
        (eldoc-add-command #'corfu-insert)
        (keymap-set corfu-map "M-p" #'corfu-popupinfo-scroll-down)
        (keymap-set corfu-map "M-n" #'corfu-popupinfo-scroll-up)
-       (keymap-set corfu-map "M-d" #'corfu-popupinfo-toggle) 
-       :demand t)
-
+       (keymap-set corfu-map "M-d" #'corfu-popupinfo-toggle))
+(elpaca-wait)
    
 ;;; Cape
 
 (use-package cape
-  :ensure (:wait t)
+  :ensure t
   :config
   ;; Setup Cape for better completion-at-point support and more
 
@@ -149,7 +149,7 @@
     (corfu-mode))
   (add-hook 'eshell-mode-hook #'crafted-completion-corfu-eshell)
 
-  :demand t)
+ )
 
 (provide 'crafted-completion-config)
 ;;; crafted-completion.el ends here
