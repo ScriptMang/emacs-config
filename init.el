@@ -2,12 +2,12 @@
 ;;; Commentary: Emacs Startup File --- initialization for Emacs
 ;; Elpaca Installer -*- lexical-binding: t; -*-
 ;; Copy below this line into your init.el
-(defvar elpaca-installer-version 0.8)
+(defvar elpaca-installer-version 0.11)
 (defvar elpaca-directory (expand-file-name "elpaca/" user-emacs-directory))
 (defvar elpaca-builds-directory (expand-file-name "builds/" elpaca-directory))
 (defvar elpaca-repos-directory (expand-file-name "repos/" elpaca-directory))
 (defvar elpaca-order '(elpaca :repo "https://github.com/progfolio/elpaca.git"
-                              :ref nil :depth 1
+                              :ref nil :depth 1 :inherit ignore
                               :files (:defaults "elpaca-test.el" (:exclude "extensions"))
                               :build (:not elpaca--activate-package)))
 (let* ((repo  (expand-file-name "elpaca/" elpaca-repos-directory))
@@ -17,7 +17,7 @@
   (add-to-list 'load-path (if (file-exists-p build) build repo))
   (unless (file-exists-p repo)
     (make-directory repo t)
-    (when (< emacs-major-version 28) (require 'subr-x))
+    (when (<= emacs-major-version 28) (require 'subr-x))
     (condition-case-unless-debug err
         (if-let* ((buffer (pop-to-buffer-same-window "*elpaca-bootstrap*"))
                   ((zerop (apply #'call-process `("git" nil ,buffer t "clone"
@@ -41,7 +41,6 @@
 (add-hook 'after-init-hook #'elpaca-process-queues)
 (elpaca `(,@elpaca-order))
 
-
 (elpaca elpaca-use-package
 (elpaca-use-package-mode))
 (elpaca-wait)
@@ -54,14 +53,13 @@
 ;;; Configuration phase
 ;;(use-package general :ensure (:wait t))
 
-
-
 ;;; Optional configuration
 ;; load timu theme
 (use-package timu-spacegrey-theme
   :ensure t
   :config
-  (load-theme `timu-spacegrey t))
+  (load-theme `timu-spacegrey t) 
+) 
 
 ;; disable Emacs toolbar
 (tool-bar-mode -1)
@@ -70,7 +68,6 @@
 (scroll-bar-mode -1)
 
 (setq aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l))
-
 
 ;;  modern tab-bar mode on
 (use-package modern-tab-bar
@@ -99,6 +96,10 @@
 (setq tab-stop-list nil)
 (setq default-tab-width 2)
 
+
+
+
+
 ;;; dashboard for emacs
 (use-package dashboard
   :ensure t
@@ -109,9 +110,12 @@
       dashboard-icon-type 'nerd-icons) ;; use `nerd-icons' package
 )
 
+
+
+
 ;; xah-flykeys
 (use-package xah-fly-keys
- :ensure t
+ :ensure (:source "NON-GNU-ELPA" :host github :repo "https://github.com/xahlee/xah-fly-keys") 
  :init (xah-fly-keys 1))
 
 ;; Which-Key Config
@@ -165,7 +169,7 @@
                        elpaca--pre-built-steps elpaca-build-steps))
           (list '+elpaca-unload-seq 'elpaca--activate-package)))
 
-(elpaca `(seq :build ,(+elpaca-seq-build-steps)))
+(elpaca `(seq :ensure (:source "GNU-ELPA" :repo "https://git.savannah.gnu.org/gitweb/?p=emacs/elpa.git;a=shortlog;h=refs/heads/externals/seq") :build ,(+elpaca-seq-build-steps)))
 
 ;; enable matching brackets/parens
 (use-package emacs :ensure nil :config (setq electric-pair-mode 1)) 
@@ -182,6 +186,7 @@
                           '(("^ *\\([-]\\) "
                              (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•"))))))
 
+ 
   ;; Set faces for heading levels
   (dolist (face '((org-level-1 . 1.2)
                   (org-level-2 . 1.1)
@@ -193,26 +198,106 @@
                   (org-level-8 . 1.1)))
     (set-face-attribute (car face) nil :font "Cantarell" :weight 'regular :height (cdr face)))
 
-  ;; Ensure that anything that should be fixed-pitch in Org files appears that way
-  (set-face-attribute 'org-block nil :foreground nil :inherit 'fixed-pitch)
-  (set-face-attribute 'org-code nil   :inherit '(shadow fixed-pitch))
-  (set-face-attribute 'org-table nil   :inherit '(shadow fixed-pitch))
-  (set-face-attribute 'org-verbatim nil :inherit '(shadow fixed-pitch))
-  (set-face-attribute 'org-special-keyword nil :inherit '(font-lock-comment-face fixed-pitch))
-  (set-face-attribute 'org-meta-line nil :inherit '(font-lock-comment-face fixed-pitch))
-  (set-face-attribute 'org-checkbox nil :inherit 'fixed-pitch))
+;; Ensure that anything that should be fixed-pitch in Org files appears that way
+    (set-face-attribute 'org-block nil    :foreground nil :inherit 'fixed-pitch)
+    (set-face-attribute 'org-table nil    :inherit 'fixed-pitch)
+    (set-face-attribute 'org-formula nil  :inherit 'fixed-pitch)
+    (set-face-attribute 'org-code nil     :inherit '(shadow fixed-pitch))
+    (set-face-attribute 'org-table nil    :inherit '(shadow fixed-pitch))
+    (set-face-attribute 'org-verbatim nil :inherit '(shadow fixed-pitch))
+    (set-face-attribute 'org-special-keyword nil :inherit '(font-lock-comment-face fixed-pitch))
+    (set-face-attribute 'org-meta-line nil :inherit '(font-lock-comment-face fixed-pitch))
+    (set-face-attribute 'org-checkbox nil  :inherit 'fixed-pitch))
 
-(use-package org
-  :ensure t
+
+
+
+ (use-package emacs
+  :ensure nil
+  :after org
   :hook (org-mode . efs/org-mode-setup)
   :config
+  
   (setq org-ellipsis " ▾")
+  (setq org-agenda-start-with-log-mode t)
+  (setq org-log-done 'time)
+  (setq org-log-into-drawer t)
+
+  (setq org-agenda-files 
+        '("~/Library/Mobile Documents/com~apple~CloudDocs/Org Notes/conch.org"
+        "~/Library/Mobile Documents/com~apple~CloudDocs/Org Notes/birthdays.org"))
+  
+(setq org-todo-keywords
+'((sequence "TODO(E)" "NEXT(n)" "|" "DONE(d!)")
+  (sequence "BACKLOG(b)" "PLAN(p)" "READY(r)" "ACTIVE(a)" "REVIEW(v)" "WAIT(w@/!)" "HOLD(h)" "|" "COMPLETED(c)" "CANC(k@)")))
+
+ (setq org-tag-alist
+    '((:startgroup)
+       ; Put mutually exclusive tags here
+       (:endgroup)
+       ("@errand" . ?E)
+       ("@home" . ?H)
+       ("@work" . ?W)
+       ("agenda" . ?a)
+       ("planning" . ?p)
+       ("publish" . ?P)
+       ("batch" . ?b)
+       ("note" . ?n)
+       ("idea" . ?i)))
+
+ 
+ ;; Configure custom agenda views
+  (setq org-agenda-custom-commands
+   '(("d" "Dashboard"
+     ((agenda "" ((org-deadline-warning-days 14)))
+      (todo "NEXT"
+        ((org-agenda-overriding-header "Next Tasks")))
+      (tags-todo "agenda/ACTIVE" ((org-agenda-overriding-header "Active Projects")))))
+
+    ("n" "Next Tasks"
+     ((todo "NEXT"
+        ((org-agenda-overriding-header "Next Tasks")))))
+
+    ("W" "Work Tasks" tags-todo "+work-email")
+
+    ;; Low-effort next actions
+    ("e" tags-todo "+TODO=\"NEXT\"+Effort<15&+Effort>0"
+     ((org-agenda-overriding-header "Low Effort Tasks")
+      (org-agenda-max-todos 20)
+      (org-agenda-files org-agenda-files)))
+
+    ("w" "Workflow Status"
+     ((todo "WAIT"
+            ((org-agenda-overriding-header "Waiting on External")
+             (org-agenda-files org-agenda-files)))
+      (todo "REVIEW"
+            ((org-agenda-overriding-header "In Review")
+             (org-agenda-files org-agenda-files)))
+      (todo "PLAN"
+            ((org-agenda-overriding-header "In Planning")
+             (org-agenda-todo-list-sublevels nil)
+             (org-agenda-files org-agenda-files)))
+      (todo "BACKLOG"
+            ((org-agenda-overriding-header "Project Backlog")
+             (org-agenda-todo-list-sublevels nil)
+             (org-agenda-files org-agenda-files)))
+      (todo "READY"
+            ((org-agenda-overriding-header "Ready for Work")
+             (org-agenda-files org-agenda-files)))
+      (todo "ACTIVE"
+            ((org-agenda-overriding-header "Active Projects")
+             (org-agenda-files org-agenda-files)))
+      (todo "COMPLETED"
+            ((org-agenda-overriding-header "Completed Projects")
+             (org-agenda-files org-agenda-files)))
+      (todo "CANC"
+            ((org-agenda-overriding-header "Cancelled Projects")
+             (org-agenda-files org-agenda-files)))))))
+
+
   (efs/org-font-setup))
 (elpaca-wait)
 
-
-(setq org-agenda-files 
-      `("~/Library/Mobile Documents/com~apple~CloudDocs/Org Notes/conch.org"))
 
 (use-package org-bullets
   :ensure t
@@ -235,6 +320,84 @@
    :ensure t)
 
 
+;; simple org note-taking scheme
+
+(use-package denote
+  :ensure t
+  :hook
+  ( ;; If you use Markdown or plain text files, then you want to make
+   ;; the Denote links clickable (Org renders links as buttons right
+   ;; away)
+   (text-mode . denote-fontify-links-mode-maybe)
+   ;; Apply colours to Denote names in Dired.  This applies to all
+   ;; directories.  Check `denote-dired-directories' for the specific
+   ;; directories you may prefer instead.  Then, instead of
+   ;; `denote-dired-mode', use `denote-dired-mode-in-directories'.
+   (dired-mode . denote-dired-mode))
+  :bind
+  ;; Denote DOES NOT define any key bindings.  This is for the user to
+  ;; decide.  For example:
+  ( :map global-map
+    ("C-c n n" . denote)
+    ("C-c n d" . denote-sort-dired)
+    ;; If you intend to use Denote with a variety of file types, it is
+    ;; easier to bind the link-related commands to the `global-map', as
+    ;; shown here.  Otherwise follow the same pattern for `org-mode-map',
+    ;; `markdown-mode-map', and/or `text-mode-map'.
+    ("C-c n l" . denote-link)
+    ("C-c n L" . denote-add-links)
+    ("C-c n b" . denote-backlinks)
+    ;; Note that `denote-rename-file' can work from any context, not just
+    ;; Dired bufffers.  That is why we bind it here to the `global-map'.
+    ("C-c n r" . denote-rename-file)
+    ("C-c n R" . denote-rename-file-using-front-matter)
+
+    ;; Key bindings specifically for Dired.
+    :map dired-mode-map
+    ("C-c C-d C-i" . denote-dired-link-marked-notes)
+    ("C-c C-d C-r" . denote-dired-rename-files)
+    ("C-c C-d C-k" . denote-dired-rename-marked-files-with-keywords)
+    ("C-c C-d C-R" . denote-dired-rename-marked-files-using-front-matter))
+
+  :config
+  ;; Remember to check the doc string of each of those variables.
+  (setq denote-directory (expand-file-name "~/Library/Mobile Documents/com~apple~CloudDocs/Org Notes/"))
+  (setq denote-save-buffers nil)
+  (setq denote-known-keywords '("emacs" "go" "backend" "sql" "real-time data" "no sql" "database" "web" "server" "api" "automation" "framework" "caching" "authentication" "security" "monitor and logging" "ci/cd"  "testing" "load and performance" "frontend" "cloud" "aws" "azure" "gcp" "docker" "podman" "kubernetes" "finance" "qa" "metanote"))
+  (setq denote-infer-keywords t)
+  (setq denote-sort-keywords t)
+  (setq denote-prompts '(title keywords))
+  (setq denote-excluded-directories-regexp nil)
+  (setq denote-excluded-keywords-regexp nil)
+  (setq denote-rename-confirmations '(rewrite-front-matter modify-file-name))
+
+  ;; Pick dates, where relevant, with Org's advanced interface:
+ 
+
+  ;; By default, we do not show the context of links.  We just display
+  ;; file names.  This provides a more informative view.
+
+  ;; Automatically rename Denote buffers using the `denote-rename-buffer-format'.
+  (denote-rename-buffer-mode 1))
+(elpaca-wait)
+
+;; consult integration
+(use-package consult-denote
+ :ensure t
+)
+
+
+
+
+;; (use-package markdown-mode
+
+;;   :config
+;;   (markdown-max-image-size t)
+;;   :ensure t 
+;;   )
+
+
+
 ;; easily let-bind vals of an assoc-list by their names
 ;; dependency for forge
 (use-package let-alist
@@ -245,12 +408,12 @@
 
 ;; transient; dependency for magit
   (use-package transient
-   :ensure (:source "MELPA" :host github :repo "magit/transient"))
+   :ensure (:source "MELPA" :host github :repo "magit/transient" :branch "main"))
 (elpaca-wait)
 
 ;; Magit
   (use-package magit
-  :ensure (:source "MELPA" :host github :repo "magit/magit")
+  :ensure (:source "MELPA" :host github :repo "magit/magit" :branch "main")
   :custom
   (magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1))
 (elpaca-wait)
@@ -271,41 +434,76 @@
 ;; activate after magit
 ;; submode to magit
 (use-package forge
-  :ensure (:host github :repo "magit/forge")
+  :ensure (:host github :repo "magit/forge" :branch "main")
   :after magit)
 
-;; use calibrereader in emacs
-(use-package calibredb
-  :ensure t
-  :config
-  (setq calibredb-program "/Applications/calibre.app/Contents/MacOS/calibredb")
-  (setq calibredb-root-dir "~/Calibre Library")
-  (setq calibredb-db-dir (expand-file-name "metadata.db" calibredb-root-dir))
-  (setq calibredb-library-alist '(("~/Calibre Library")))
-  (setq calibredb-search-page-max-rows 44)
-  (setq calibredb-id-width 4))
-(elpaca-wait)
 
-;; edit table of contents for pdfs/dvjs files
-(use-package doc-toc
-  :ensure t)
+;; terminal emulators
+(use-package vterm
+ :ensure t
+)
+
+;; multiple vterm buffers
+(use-package multi-vterm :ensure t)
+
+;; manage macos external services
+;; servers,network services, daemons, etcs
+(use-package prodigy
+ :ensure t
+ :config
+  
+ (prodigy-define-service
+   :name "drumstick-app"
+   :command "air"
+   :cwd "~/github/drumstick/"
+   :tags '(portfolio-proj)
+   :stop-signal `sigint
+   :kill--process-buffer-on-stop t)
+)
+
+;; handles system init services like brew
+(use-package daemons
+ :ensure t
+)
+
+;; manage docker containers with support
+;; for docker compose, contexts, networks,
+;; volume and image controls through transient menus
+(use-package docker
+ :ensure t
+)
+
+;; read and edit dockerfile in emacs
+;; install dockerfile-language-server-nodejs for better syntax highlighting, editing, 
+;; autocomplete, diagnostics, and linting. Its something you install from lsp-mode.
+(use-package dockerfile-mode
+ :ensure t
+)
+
+;; read and edit yaml files in emacs
+(use-package yaml-mode
+ :ensure t
+ :mode 
+ ("\\.yaml\\'" "\\.yml\\`")
+)
+
+
+;; manage kubernetes pods
+(use-package kubed
+ :ensure t
+)
+
+;; manage aws-cli
+;;(use-package aws
+;; :ensure t
+;;)
+
+;; manage azure-cli
+;;(use-package azure
+;; :ensure t
+;;)
+
        
-(use-package nov 
-  :ensure t
-  :after esxml
-  :config (add-to-list 'auto-mode-alist '("\\.epub\\'" . nov-mode)))
-(elpaca-wait)
-
-(use-package nov-xwidget
-  :ensure (:host github :repo "chenyanming/nov-xwidget")
-  :after nov
-  :config
-  (define-key nov-mode-map (kbd "o") 'nov-xwidget-view)
-  (add-hook 'nov-mode-hook 'nov-xwidget-inject-all-files))
-
-
-
-
 ;; drag lines and regions easily
 (use-package drag-stuff
  :ensure t
@@ -344,7 +542,7 @@
   (setq doom-modeline-bar-width 4)
   (setq doom-modeline-lsp-icon t)
   (setq doom-modeline-lsp nil)
-  (setq doom-modeline-flycheck-enable t)
+  (setq doom-modeline-fly t)
   (setq doom-modeline-hud nil)
   (setq doom-modeline-workspace-name nil)
   (setq doom-modeline-buffer-file-name-style 'file-name))
@@ -454,11 +652,6 @@
   :config
   (treemacs-load-theme "nerd-icons"))
 
-(use-package project-treemacs
-  :ensure t
-  :after treemacs
-  :config
-  (project-treemacs-mode))
 
 ;; collection of really useful extensions
 (use-package crux
@@ -471,28 +664,29 @@
 ;; enable avy go to line
 (global-set-key (kbd "M-g f") 'avy-goto-line)
 
-
 ;; Programming Configs
 (use-package go-mode
-  :ensure t
-  :config
-  (autoload 'go-mode "go-mode" nil t)
-  (add-to-list 'auto-mode-alist '("\\.go\\'" . go-mode))
-   (add-hook 'go-mode-hook 
-  (lambda ()
-    (add-hook 'before-save-hook 'gofmt-before-save)
-    (setq-default) 
-    (setq tab-width 4) 
-    (setq standard-indent 1) 
-    (setq indent-tabs-mode nil))))
+ :ensure t
+ :config
+ (autoload 'go-mode "go-mode" nil t)
+ (add-to-list 'auto-mode-alist '("\\.go\\'" . go-mode))
+  (add-hook 'go-mode-hook 
+ (lambda ()
+   (add-hook 'before-save-hook 'gofmt-before-save) 
+  (setq-default) 
+  (setq tab-width 4) 
+  (setq standard-indent 1) 
+   (setq indent-tabs-mode nil))))
 
 ;; go-tags mode enalble
-(use-package go-tag
- :ensure t
- :after go-mode
- :config
- (define-key go-mode-map (kbd "C-c t") #'go-tag-add)
- (define-key go-mode-map (kbd "C-c T") #'go-tag-remove))
+ (use-package go-tag 
+  :ensure t
+  :after go-mode
+  :config
+   (define-key go-mode-map (kbd "C-c t") #'go-tag-add)
+   (define-key go-mode-map (kbd "C-c T") #'go-tag-remove))
+
+
 
 ;; lsp is allows for language syntax highlighting
 (use-package lsp-mode
@@ -516,26 +710,24 @@
 (use-package lsp-ui
   :ensure t)
 
-;; increase emacs default garbage-collection threshold of 800kb
-;;(setq gc-cons-threshold 400000000) ;;400MB
-;; increase the amount of data emacs processes from 1kb
-;;(setq read-process-output-max (* 26832 26832)) ;; 85MB 
 (setq lsp-diagnostic-package :none)
 ;; enable line numbers for programming modes only
 (add-hook 'prog-mode-hook #'display-line-numbers-mode)
 (global-hl-line-mode +1)
 (add-hook 'prog-mode-hook #'flyspell-prog-mode)
 
+
+
 ;; flycheck: Syntax Checker
-(use-package flycheck
-  :ensure t
-  :init (global-flycheck-mode))
+ (use-package flycheck
+   :ensure t
+   :init (global-flycheck-mode))
 
 ;; flycheck-golangci-linter
-(use-package flycheck-golangci-lint
-  :ensure t
-  :hook (go-mode . flycheck-golangci-lint-setup)
-  :config (setq flycheck-golangci-lint-config "~/.emacs.d/elpa/flycheck-golangci-lint-20240329.1647/golangcli-lint-config/.golangci.yml"))
+  (use-package flycheck-golangci-lint
+   :ensure t; 
+   :hook (go-mode . flycheck-golangci-lint-setup)
+   :config (setq flycheck-golangci-lint-config "/Users/username/.emacs.d/elpaca/repos/flycheck-golangci-lint/golangci-lint-config/.golangci.yml"))
 
 ;;consult-lsp integration
 (use-package consult-lsp
@@ -633,23 +825,9 @@
 (add-to-list 'interpreter-mode-alist '("node" . js2-mode)))
 
 ;; folding files/code closures
-(use-package origami
- :ensure t)
-
-;; lsp support for func folding
-(use-package lsp-origami
+(use-package treesit-fold
  :ensure t
- :config
- (add-hook 'lsp-after-open-hook #'lsp-origami-try-enable))
-
-;; snippets
-(use-package yasnippet
- :ensure t
- :init (yas-global-mode 1))
-
-;; stored snippets
-(use-package yasnippet-snippets
- :ensure t)
+)
 
 ;; save buffers along with split window configs
 ;; in a named workspace tab
